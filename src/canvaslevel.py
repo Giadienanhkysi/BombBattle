@@ -4,12 +4,11 @@ from blockmatrix import BlockMatrix, Block
 from player import Player
 from monster import Monster
 class Canvas:
-    '''graphic class'''
+    '''Lớp vẽ đồ họa'''
     def __init__(self, screen, pos, scale = 50):
         self.screen = screen
         self.pos = pos # vị trí của cả map
         self.scale = scale
-        self.delayed = []
 
     def draw(self, img, pos):
         '''Draw graphic'''        
@@ -22,6 +21,7 @@ class Canvas:
 
 
 class Level:
+    """lớp này dùng để khởi tạo các màn chơi"""
     def __init__(self, canvas, matrix, player, monsters=[]):
         self.canvas = canvas
         self.matrix = matrix
@@ -31,19 +31,25 @@ class Level:
         self.monsters = monsters
 
     def draw(self):
+        # vẽ map
         self.matrix.draw(self.canvas)
+        # vẽ lửa
         for flame in self.flames:
             flame.draw(self.canvas)
+        # vẽ bomb
         for bomb in self.bombs.values():
             bomb.draw(self.canvas)
+        # vẽ nguwoif chơi
         for player in self.players:
-            player.draw(self.canvas)    
+            player.draw(self.canvas) 
+        # vẽ quái   
         for monster in self.monsters:
             monster.draw(self.canvas)
 
         
     
     def loop(self, time):
+        # hàm tính thời gian, gọi đến từng hàm tính tg của các đối tượng
         self.matrix.loop(time)
         for flame in self.flames:
             flame.loop(self, time)
@@ -69,10 +75,10 @@ class Level:
         '''kiểm tra xem có thể đặt bom hay không'''
         pos = round(x), round(y)
         can_place = (
-          pos not in self.bombs 
-          and self.matrix.check_bomb_placeable(*pos)
-          and not (0.45 < x - int(x) < 0.55)#tránh bị kẹt giữa 2 quả bom
-          and not (0.45 < y - int(y) < 0.55)
+          pos not in self.bombs #bom không trùng vtri bom khác
+          and self.matrix.check_bomb_placeable(*pos) # bom không đặt lên vạt cản
+          and not (0.45 < x - int(x) < 0.55)#tránh bị kẹt giữa 2 quả bom, nếu ko có đk này, player 
+          and not (0.45 < y - int(y) < 0.55)#sẽ bị kẹt giữa 2 quả bom
         )
         if can_place:
             self.bombs[pos] = Bomb(*pos, placer, placer.bomb_blast_radius) #them bom vào danh sách các bom            
@@ -84,15 +90,15 @@ class Level:
             if bomb.placer == player:
                 count += 1
         return count
-    NUMBER_OF_TILES = 13*13
-    NUMBER_OF_RANDOMIZABLE_TILES_SP = NUMBER_OF_TILES - 77
+    NUMBER_OF_TILES = 13*13 # tổng số lượng các ô
+    NUMBER_OF_REMAIN_TILES = NUMBER_OF_TILES - 73 # số lượng ô trống còn lại có thể có = tổng trừ đi sl cố định
 
     @staticmethod
     def singleplayer(game, canvas, monsters_lim=[3, 4], boxes_lim=[15, 35], max_bomb = 1, bomb_blast_radius = 2):
+        # số lượng bom
         monsters_number = random.randrange(monsters_lim[0], monsters_lim[1]+1)
         boxes_number = random.randrange(boxes_lim[0], boxes_lim[1]+1)
-        grass_number = Level.NUMBER_OF_RANDOMIZABLE_TILES_SP - monsters_number - boxes_number
-
+        grass_number = Level.NUMBER_OF_REMAIN_TILES - monsters_number - boxes_number
         # 0: Grass
         # 1: Boxes
         # 2: Goal

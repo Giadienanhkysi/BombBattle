@@ -62,8 +62,10 @@ class Flame:
             lvl.flames.remove(self)
 
     def collides(self, x, y):
+        # kiểm tra va chạm 
+        # chạm tính bắt đầu từ viền
         return - 0.6 <= x - self.pos[0] <= 0.6 and - 0.6 <= y - self.pos[1]<= 0.6            
-    
+    # astract
     def draw(self, canvas):
         pass
         
@@ -82,7 +84,7 @@ class CenterFlame(Flame):
 
     def draw(self, canvas):
         current_frame = self.timer//0.1
-        # in ảnh theo thứ tự 0 1 2 1 0
+        # in ảnh theo thứ tự 0 1 2 1 0 
         if current_frame > 2:
             current_frame = 4 - current_frame
         current_frame = int(current_frame)
@@ -99,7 +101,8 @@ class VerticalFlame(Flame):
             if up_to_down:
                 ny = y + 1
             else:
-                ny = y - 1        
+                ny = y - 1      
+            # mỗi  lần in ra 1 flame thì giảm biến radius 1
             flame = VerticalFlame(lvl, x, ny, flame_list, radius - 1, timer, up_to_down)
             if flame.can_spread:
                 flame_list.append(flame)

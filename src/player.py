@@ -58,7 +58,7 @@ class Player:
     def die(self):
         self.alive = False
         self.time_since_dead = 0
-        self.game.player_died(self)
+        self.game.player_died()
         ASSETS['player_die_sound'].play()        
         # pass
     

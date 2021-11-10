@@ -3,7 +3,6 @@ import pygame
 pygame.init()
 class Settings:    
     def __init__(self):               
-
         self.DEFAULT_SINGLEPLAYER_CONTROLS = {
             'up': pygame.K_UP,
             'down': pygame.K_DOWN,

@@ -7,10 +7,7 @@ ASSETS = {
 }
 
 
-PAUSE_KEY = pygame.K_ESCAPE
-SELECT_KEY = pygame.K_RETURN
-UP_KEY = pygame.K_UP 
-DOWN_KEY = pygame.K_DOWN
+
 
 
 
@@ -18,13 +15,13 @@ class MenuOption:
     def __init__(self, screen, label, select):
         self.screen = screen
         self.label = label
-        self.select = select
+        self.select = select #biến này lưu 1 hàm mở menu
 
     def draw(self, y, point):                
         cursor = ASSETS['menu_pointer']
         label = Settings().GAME_FONT_MENU.render(self.label, True, (255, 255, 255))
 
-        if point:#kiem tra xem sel dang chi vao dau
+        if point:#kiem tra xem select dang chi vao dau
             self.screen.blit(cursor, cursor.get_rect(left=120, centery=y))
         self.screen.blit(label, label.get_rect(left=190, centery=y))
 
@@ -52,8 +49,9 @@ class Menu:
             MenuOption(screen, 'Main menu',  lambda: self.open('main'))
           ]     
         }
-
+    # hàm này để mở các menu
     def open(self, mode, score=None, stage=None):
+        # biến score và stage dùng để in ra màn hình gameover trong menu gameover
         self.score = score
         self.stage = stage
         if self.mode != mode:
@@ -74,23 +72,25 @@ class Menu:
 
             self.screen.blit(gameover_label, gameover_label.get_rect(left=80, top=190))
             self.screen.blit(score, gameover_label.get_rect(left=80, top=250))
-            self.screen.blit(stage, gameover_label.get_rect(left=80, top=300))        
-        y = 500
+            self.screen.blit(stage, gameover_label.get_rect(left=80, top=300))                
+        y = 500 #vị trí dòng đầu
         for i, option in enumerate(self.options[self.mode]):
           option.draw(y, self.selected == i)
           y += 70 #khoang cach giua cac dong
         
-    def handle_key(self, key):
-        if key == PAUSE_KEY and self.mode == 'pause':
+    def handle_key(self, key):        
+        if key == Settings().PAUSE_KEY and self.mode == 'pause':
+            #nếu đang ở pause bấm pause key lần nữa để resume game
             self.ai_game.resume_game()
-        elif key == SELECT_KEY:
+        elif key == Settings().SELECT_KEY:
+            #bấm enter sẽ gọi đến biến function select của menu option
             self.options[self.mode][self.selected].select()
-        elif key == UP_KEY:
+        elif key == Settings().UP_KEY:
             if self.selected == 0:
                 self.selected = len(self.options[self.mode]) - 1 #nhay xuong cuoi
             else:
                 self.selected -= 1
-        elif key == DOWN_KEY:
+        elif key == Settings().DOWN_KEY:
             if self.selected == len(self.options[self.mode]) - 1:
                 self.selected = 0 #nhay len dau
             else:

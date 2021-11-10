@@ -15,9 +15,9 @@ class Game:
         self.level = None 
         self.initialize_level()
         
-    def loop(self, time):
+    def loop(self, time):        
         self.time -= time
-        self.update_gamebar()
+        self.time_ups_update()
         self.level.loop(time)
 
     def draw(self):
@@ -37,11 +37,12 @@ class Game:
     def draw_gamebar(self):
         pass
     
-    def update_gamebar(self):
+    def time_ups_update(self):
         pass
 
 
 class ClassicGame(Game):
+    '''lơp này khởi tạo chế độ chơi'''
     def __init__(self, ai_game, screen, initial_time=Settings().playtime, lives=3):
         self.score = 0
         self.stage = 1
@@ -55,6 +56,7 @@ class ClassicGame(Game):
         super().__init__(ai_game, screen, initial_time)
         
     def initialize_level(self):
+        # khởi tạo màn chơi mới
         self.restart_level_timer = None
         self.start_next_level_timer = None
         self.time = self.initial_time
@@ -85,6 +87,7 @@ class ClassicGame(Game):
             self.lives -= 1
             self.initialize_level()
         else:
+            # nếu hết mạng phát tiếng game over và chuyển ra menu gameover
             ASSETS['game_over_sound'].play()           
             self.ai_game.menu.open('gameover', score=self.score, stage=self.stage)
     
@@ -135,11 +138,14 @@ class ClassicGame(Game):
         self.screen.blit(logo_game, logo_game.get_rect(centerx=325, top = -60))
         self.screen.blit(lives, lives.get_rect(right = 610, centery = 100))
 
-    def update_gamebar(self):
+    def time_ups_update(self):
         if self.time <= 0: 
+            # khi gọi hàm khởi tạo màn mới 2 biến = None khi đó sẽ đặt thời gian khởi tạo màn mới
             if self.restart_level_timer == None and self.start_next_level_timer == None:
-                self.restart_level_timer = 4
+                print(self.restart_level_timer, self.start_next_level_timer)
+                self.restart_level_timer = 2.5
 
-    def player_died(self, player):
+    def player_died(self):
+        # hàm initialize_level() đc gọi
         if self.restart_level_timer == None and self.start_next_level_timer == None:
             self.restart_level_timer = 4 # thời gian kể từ khi chết

@@ -53,6 +53,7 @@ class Monster:
             pygame.mixer.Sound('assets/sound/door_opening_sound.ogg').play() 
 
     def loop(self, lvl, time):
+        # tính toán thời gian vẽ monster và thời gian nháy mắt
         self.clock += time
         self.seconds_since_eyes_closed += time
         self.loop_eyes()
@@ -68,6 +69,8 @@ class Monster:
                 lvl.monsters.remove(self)                
 
     def check_has_to_change_direction_due_to_bomb(self, lvl):
+        """hàm này kiểm tra xem vị trí tiếp theo đi đến có trùng quả bom sẽ đặt không, nếu trùng 
+        monster sẽ đè lên bom và đi qua bom"""
         if self.direction == 'up':
             px, nx = self.pos[0], self.pos[0]
             py, ny = math.ceil(self.pos[1]), math.floor(self.pos[1]) # vi tri cũ, vị trí tiếp theo sẽ đến
@@ -88,15 +91,19 @@ class Monster:
             return
 
         if (nx, ny) not in lvl.bombs:
+            #nếu vị trí tiếp không trung thì đi tiếp
             return
         elif (px, py) not in lvl.bombs:
+            #nếu vt tiếp trùng vị trí cũ không trùng thì quay lại
             self.direction = d      
         else:
+            # nếu bị chặn thì đứng yên
             self.direction = 'idle'                          
     def maybe_try_change_directions(self, lvl):
+        """hàm này sử dụng để đổi hướng di chuyển ngẫu nhiên"""
         x, y = int(self.pos[0]), int(self.pos[1])
         if self.direction == 'up':
-            weights = [87, 3, 7, 3] #trọng số hướng tương ứng [up, right, down, left]
+            weights = [87, 3, 7, 3] #trọng số hướng tương ứng các hướng [up, right, down, left]
         elif self.direction == 'right':
             weights = [3, 87, 3, 7]
         elif self.direction == 'down':
@@ -106,23 +113,32 @@ class Monster:
         elif self.direction == 'idle':
             weights = [25, 25, 25, 25] # tất cả các hướng tương đương nhau
 
+
         #[up, right, down, left]
         # kiểm tra các hướng xem có vật cản không, nếu không thì được phép đi qua
         possible = [True, True, True, True]
+        # kiểm tra xem có bị bom chặn và có vật cản như tường không
         for i, pos in enumerate([(x, y-1), (x+1, y), (x, y+1), (x-1, y)]):
+            #kiểm tra bom
             for bomb in lvl.bombs.values():
                 if bomb.collides(*pos):
                     possible[i] = False
                     break
+            # kiểm tra vật cản
             possible[i] = possible[i] and not (lvl.matrix.is_solid(*pos))
+
          # Tổng trọng số của tất cả các hướng có thể đi
         total = sum([w for w, a in zip(weights, possible) if a])  
 
-        # lưu lại trọng số của các hướng nếu không thể đi thì lưu = 0    
-        weights = [w/total if a else 0 for w, a in zip(weights, possible)]    
-        rnd = random.random()
+        # lưu lại trọng số của các hướng(trọng số 1 hướng = trọng số của nó chia tổng (total))
+        #  nếu không thể đi thì lưu = 0   
+        # (làm theo cách này monster sẽ đổi hướng mượt hơn, không bị đột ngột và đi 1 đoạn đủ dài trước khi đổi) 
+        weights = [w/total if a else 0 for w, a in zip(weights, possible)]   
+        # print(weights) 
+        rnd = random.random()#chọn giá trị ngẩu nhiên        
         d = 0
-        # chọn hướng đầu tiên có tổng giá trị từ trước tính đến nó lớn hơn rnd để di chuyển theo hướng đó
+        # cộng dồn trọng số các hướng 
+        # chọn hướng đầu tiên làm cho tổng cộng dồn lớn hơn rnd để di chuyển theo hướng đó
         for w, direction in zip(weights, ['up', 'right', 'down', 'left']):
             if w ==0:
                 continue
@@ -137,7 +153,8 @@ class Monster:
     def move(self, lvl, distance):#0.0128
         cx, cy = self.pos
         rx, ry = round(self.pos[0]), round(self.pos[1])
-        if (ry - cy == 0 and rx - cx == 0) or self.direction == 'idle':# nếu đứng đúng vị trí hàng(cột) mới thực hiện nếu không sẽ bị đè lên vật cản            
+        if (ry - cy == 0 and rx - cx == 0) or self.direction == 'idle':
+        # nếu đứng thẳng vị trí hàng(cột) thì mới thực hiện đổi hướng, nếu không sẽ bị đè lên vật cản            
             self.maybe_try_change_directions(lvl)
 
         if self.direction == 'up':                                
@@ -174,8 +191,12 @@ class Monster:
     
     def loop_eyes(self): 
         if self.seconds_since_eyes_closed >= 0.2:
-            self.eyes_closed = False            
-        if self.seconds_since_eyes_closed >= 0.4:
+            # thời gian nhắm mắt >= 0.2s thì mở ra
+            self.eyes_closed = False  
+            #khi thời gian self.seconds_since_eyes_closed >= 1.5       
+            # thì thực hiện kiểm tra xem có thể nhắm mắt tiếp hay ko, nếu được thì gán lại
+            # self.seconds_since_eyes_closed = 0
+        if self.seconds_since_eyes_closed >= 1.5:
             if random.random() <= 0.5:
                 self.eyes_closed = True
                 self.seconds_since_eyes_closed = 0
@@ -183,8 +204,9 @@ class Monster:
     def draw(self, canvas):
         if self.alive:
             current_frame = int((self.clock%0.4)//0.2)# luôn thu được 2 giá trị 0, 1
-            if self.eyes_closed:
-                current_frame += 2
+            if self.eyes_closed:                
+                # mắt đóng in ra hình mắt đóng
+                current_frame += 2                
             canvas.draw(ASSETS['monster'][self.direction][current_frame], self.pos)
         else:
             current_frame = int((1-self.time_to_disappear)//0.2)

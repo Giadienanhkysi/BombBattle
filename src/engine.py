@@ -18,7 +18,8 @@ class BomBattle():
         self.canvas = Canvas(self.screen, (0, 130))
         self.menu = Menu(self.screen, self)
         self.running = True
-
+        self.game = None
+    #cac hàm dùng trong menu
     def new_classic_game(self):
         self.menu.is_open = False
         self.game = ClassicGame(self, self.screen)
@@ -36,10 +37,7 @@ class BomBattle():
             self.game = ClassicGame(self, self.screen)
         
 
-    def play_again(self):
-        self.menu.is_open = False
-        self.game.play_again()
-
+    # hàm chạy chương trình
     def run_game(self):
         while self.running:
             self.clock.tick(120)

@@ -1,6 +1,7 @@
 import pygame
 import math
 from flame import CenterFlame
+from settings import Calculate
 ASSETS = {  
     'bomb': [
       pygame.image.load('assets/bomb/bomb_{}.png'.format(i)) for i in range(1, 11)
@@ -12,10 +13,11 @@ def list_colliding_coordinates(x, y):
     return math.floor(x), math.ceil(x), math.floor(y), math.ceil(y)
     
 class Bomb:
+    """Lop bom"""
     def __init__(self, x, y, placer, radius = 2, timer = 3):
         self.pos = (x, y)
         self.timer = timer
-        self.placer = placer
+        self.placer = placer # biến lưu player
         self.radius = radius
         self.chaining = False
     
@@ -26,7 +28,8 @@ class Bomb:
         if self.timer <=0:
             self.fire(lvl)
 
-    def fire(self, lvl):        
+    def fire(self, lvl):   
+        # hàm khai hỏa
         ASSETS['bomb_explode_sound'].play()     
         x, y = self.pos
         flame_list = lvl.flames
@@ -37,7 +40,7 @@ class Bomb:
         
 
     def collides(self, x, y):
-        xl, xh, yl, yh = list_colliding_coordinates(x, y)
+        xl, xh, yl, yh = Calculate.list_colliding_coordinates(x, y)
         return xl <= self.pos[0] <= xh and yl <= self.pos[1] <= yh
     # kiểm tra xem có thể đi xuyên qua bomb hay không
     def collides_closer(self, x, y):
@@ -46,6 +49,7 @@ class Bomb:
 
     def draw(self, canvas):
         if self.chaining:
+            # nếu 1 quả bom nổ thì quả bên cạnh nổ theo
             canvas.draw(ASSETS['bomb_chaining'], self.pos)
         else:
             # có 10 bức hình bom, nên ta sẽ cài cho current_frame sẽ chạy từ 0-10, ví dụ:

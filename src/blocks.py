@@ -16,6 +16,7 @@ ASSETS = {
     'powerup_bombup': pygame.image.load('assets/powerup_bombup.png'),            
 }
 class Block(Enum):    
+    """Lop ke thua tu enum dung de tao cac doi tuong khoi trong map"""
     GRASS = 0
     WALL = 1
     BOX = 2
@@ -35,7 +36,8 @@ class Block(Enum):
 
         
     def draw(self, canvas, x, y):
-        assets_indexes = {
+        """ham nay dung de ve cac khoi ra man hinh"""
+        assets_indexes = {            
             Block.GRASS: 'grass',
             Block.WALL : 'wall',
             Block.BOX: 'box',
@@ -51,8 +53,10 @@ class Block(Enum):
         }
         
         img = ASSETS[assets_indexes[self]]
+        #ve grass lam nen cho cac powerup, neu khong ve nen map se bi "thung"
         if self in [Block.POWERUP_LIFE, Block.POWERUP_BLAST, Block.POWERUP_BOMBUP]:
             canvas.draw(ASSETS['grass'], (x,y))
+        # ve
         canvas.draw(img, (x, y))
         
 
